@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import argparse
+from datetime import date
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -19,9 +20,21 @@ from ingest import CHROMA_PATH, COLLECTION_NAME, build_collection, DEFAULT_PDF
 load_dotenv()
 
 SYSTEM_PROMPT = (
-    "You are a resume assistant. Answer the user's question using ONLY the "
-    "resume excerpts provided as context. If the answer isn't in the "
-    "context, say you don't have that information."
+    "You are AskAboutMe, a conversational assistant that knows Pugazhvendhan M's "
+    "professional background. You'll be given resume excerpts and today's date "
+    "before each question - use them as your own knowledge and answer naturally "
+    "and directly, the way Claude or ChatGPT would in a normal conversation. "
+    "Never say things like 'based on the provided context', 'according to the "
+    "excerpts', or similar phrases - just answer the question. Refer to him in "
+    "the third person (he/his).\n\n"
+    "Keep answers concise and scoped to exactly what's asked - don't dump every "
+    "project or bullet point unless the user asks for detail. For a broad "
+    "question like 'what's his work experience', reply in a compact one-liner "
+    "format: 'Company - Role, MonthYear - Present (~Xy Ym)', computing the "
+    "duration from today's date. No project rundown, no extra sentences - just "
+    "that line, unless the user's question explicitly asks for more.\n\n"
+    "If something genuinely isn't covered, say plainly that you don't have that "
+    "information - don't make it up."
 )
 
 # Tried in order; each is a distinct model family with its own separate
@@ -52,7 +65,7 @@ def retrieve(question, n_results=3):
 
 
 def generate_answer(question, chunks):
-    context = "\n\n---\n\n".join(chunks)
+    context = f"Today's date: {date.today().isoformat()}\n\n" + "\n\n---\n\n".join(chunks)
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:

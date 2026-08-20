@@ -18,6 +18,19 @@ def extract_text(pdf_path):
     return "\n".join(pages)
 
 
+def _word_boundary_overlap(text, overlap):
+    """Take a whole-word suffix of `text` no longer than `overlap` chars."""
+    words = text.split()
+    tail = []
+    length = 0
+    for word in reversed(words):
+        if length + len(word) + 1 > overlap:
+            break
+        tail.insert(0, word)
+        length += len(word) + 1
+    return " ".join(tail)
+
+
 def chunk_text(text, chunk_size=500, overlap=80):
     """Split into paragraph-aware chunks of ~chunk_size chars with overlap."""
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
@@ -27,7 +40,8 @@ def chunk_text(text, chunk_size=500, overlap=80):
     for para in paragraphs:
         if current and len(current) + len(para) + 1 > chunk_size:
             chunks.append(current)
-            current = current[-overlap:] + "\n" + para
+            overlap_text = _word_boundary_overlap(current, overlap)
+            current = f"{overlap_text}\n{para}" if overlap_text else para
         else:
             current = f"{current}\n{para}" if current else para
     if current:

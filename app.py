@@ -37,7 +37,7 @@ st.markdown(
 
     <div class="brand-card">
         <h1>AskAboutMe</h1>
-        <p class="tagline">A RAG-powered assistant for exploring my professional background</p>
+        <p class="tagline">Your guide to my professional journey</p>
     </div>
     """,
     unsafe_allow_html=True,
